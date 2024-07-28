@@ -36,13 +36,13 @@ cd RisePhoneBook
 
 To build the project, use the following command:
 
-```
+```bash
 nvm clean package
 ```
 ### Run the Application Locally
 
 To run the application locally, use the following command:
-```
+```bash
 java -jar target/phonebook-api-1.0-SNAPSHOT.jar
 ```
 The application will start and be accessible at `http://localhost:8080`.
@@ -52,60 +52,78 @@ The application will start and be accessible at `http://localhost:8080`.
 To run the application in a Docker container, follow these steps:
 1.  **Build the Docker Image**:
     
-    ```docker build -t phonebook-api .``` 
+    ```bash
+    docker build -t phonebook-api .
+    ``` 
     
-2.  **Run the Docker Container**:
+3.  **Run the Docker Container**:
     
-    ```docker run -d -p 8080:8080 phonebook-api```
+    ```bash
+    docker run -d -p 8080:8080 phonebook-api
+    ```
     
  ### Access the H2 Database Console
 
-The H2 database console is available at ```http://localhost:8080/h2-console```.
+The H2 database console is available at `http://localhost:8080/h2-console`.
 
--   **JDBC URL**: ```jdbc:h2:file:~/testdb```
--   **Username**: ```sa```
--   **Password**: ```password```
+-   **JDBC URL**: `jdbc:h2:file:~/testdb`
+-   **Username**: `sa`
+-   **Password**: `password`
 ### API Endpoints
 
 The following endpoints are available:
 
 -   **Get All Contacts**:
 
-    `curl -X GET http://localhost:8080/api/contacts/all` 
+    ```bash
+    curl -X GET http://localhost:8080/api/contacts/all
+    ``` 
     
 -   **Get Contacts with Pagination**:
  
-       `curl -X GET "http://localhost:8080/api/contacts?page=0&size=10"` 
+    ```bash
+    curl -X GET "http://localhost:8080/api/contacts?page=0&size=10"
+    ``` 
     
 -   **Get Contact by ID**:
 
-    `curl -X GET http://localhost:8080/api/contacts/{id}` 
+    ```bash
+    curl -X GET http://localhost:8080/api/contacts/{id}
+    ``` 
     
 -   **Add a New Contact**:
 
-    `curl -X POST http://localhost:8080/api/contacts -H "Content-Type: application/json" -d '{
+    ```bash
+    curl -X POST http://localhost:8080/api/contacts -H "Content-Type: application/json" -d '{
       "firstName": "John",
       "lastName": "Doe",
       "phone": "1234567890",
       "address": "123 Main St"
-    }'` 
+    }'
+    ``` 
     
 -   **Update an Existing Contact**:
 
-    `curl -X PUT http://localhost:8080/api/contacts/{id} -H "Content-Type: application/json" -d '{
+    ```bash
+    curl -X PUT http://localhost:8080/api/contacts/{id} -H "Content-Type: application/json" -d '{
       "firstName": "John",
       "lastName": "Doe",
       "phone": "0987654321",
       "address": "456 Elm St"
-    }'` 
+    }'
+    ``` 
     
 -   **Delete a Contact**:
 
-    `curl -X DELETE http://localhost:8080/api/contacts/{id}` 
+    ```bash
+    curl -X DELETE http://localhost:8080/api/contacts/{id}
+    ``` 
     
 
 ### Running Tests
 
 To run the tests, use the following command:
 
-`./mvnw test`
+```bash
+mvn test
+```
