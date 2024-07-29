@@ -39,7 +39,11 @@ public class ContactRepository {
     public Optional<Contact> findById(Long id) {
         String sql = "SELECT * FROM contacts WHERE id = ?";
         List<Contact> contacts = jdbcTemplate.query(sql, new Object[]{id}, rowMapper);
-        return contacts.stream().findFirst();
+        if (contacts.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(contacts.get(0));
+        }
     }
 
     public Contact save(Contact contact) {

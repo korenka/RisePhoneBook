@@ -1,21 +1,22 @@
-package com.koren.phonebook_api.model;
+package com.koren.phonebook_api.dto;
 
-public class Contact {
-    private Long id;
+import org.springframework.lang.NonNull;
+
+public class CreateContactDTO {
+
+    @NonNull
     private String firstName;
+
+    @NonNull
     private String lastName;
+
+    @NonNull
     private String phone;
+
+    @NonNull
     private String address;
 
     // Getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getFirstName() {
         return firstName;
     }
