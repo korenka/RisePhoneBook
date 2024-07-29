@@ -5,9 +5,9 @@ import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
 import com.koren.phonebook_api.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,22 +18,12 @@ public class ContactService {
     private ContactRepository contactRepository;
 
     public List<Contact> getContacts(int page, int size) {
-        return contactRepository.findAll(page, size);
+        PageRequest pageable = PageRequest.of(page, size);
+        return contactRepository.findAll(pageable).getContent();
     }
 
     public List<Contact> getAllContacts() {
-        int page = 0;
-        int size = 10;
-        List<Contact> allContacts = new ArrayList<>();
-        List<Contact> contactPage;
-
-        do {
-            contactPage = getContacts(page, size);
-            allContacts.addAll(contactPage);
-            page++;
-        } while (contactPage.size() == size);
-
-        return allContacts;
+        return contactRepository.findAll();
     }
 
     public Optional<Contact> getContactById(Long id) {
@@ -42,19 +32,16 @@ public class ContactService {
 
     public Contact addContact(Contact contact) {
         validateContact(contact);
-        contactRepository.save(contact);
-        return contact;
+        return contactRepository.save(contact);
     }
 
     public Optional<Contact> updateContact(Long id, Contact contactDetails) {
-        validateContact(contactDetails);
         return contactRepository.findById(id).map(contact -> {
             contact.setFirstName(contactDetails.getFirstName());
             contact.setLastName(contactDetails.getLastName());
             contact.setPhone(contactDetails.getPhone());
             contact.setAddress(contactDetails.getAddress());
-            contactRepository.update(id, contact);
-            return contact;
+            return contactRepository.save(contact);
         });
     }
 

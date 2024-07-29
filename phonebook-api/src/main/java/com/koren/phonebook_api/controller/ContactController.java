@@ -22,7 +22,7 @@ public class ContactController extends BaseController {
     public List<Contact> getContacts(@RequestParam int page, @RequestParam int size) {
         return contactService.getContacts(page, size);
     }
-
+    //TODO: remove once app is complete
     @GetMapping("/all")
     public List<Contact> getAllContacts() {
         return contactService.getAllContacts();
