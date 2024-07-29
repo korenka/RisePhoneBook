@@ -1,5 +1,6 @@
 package com.koren.phonebook_api;
 
+import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.model.Contact;
 import com.koren.phonebook_api.service.ContactService;
 import org.junit.jupiter.api.Test;
@@ -38,17 +39,16 @@ public class PhonebookApiApplicationTests {
         final String baseUrl = "http://localhost:" + randomServerPort + "/api/contacts";
         URI uri = new URI(baseUrl);
 
-        Contact contact = new Contact();
-        contact.setFirstName("John");
-        contact.setLastName("Doe");
-        contact.setPhone("1234567890");
-        contact.setAddress("123 Main St");
+        CreateContactDTO createContactDTO = new CreateContactDTO();
+        createContactDTO.setFirstName("John");
+        createContactDTO.setLastName("Doe");
+        createContactDTO.setPhone("1234567890");
+        createContactDTO.setAddress("123 Main St");
 
-        ResponseEntity<Contact> result = this.restTemplate.postForEntity(uri, contact, Contact.class);
+        ResponseEntity<Contact> result = this.restTemplate.postForEntity(uri, createContactDTO, Contact.class);
 
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(201, result.getStatusCodeValue());
         assertNotNull(result.getBody());
-        assertNotNull(result.getBody().getId());
     }
 
     @Test

@@ -1,9 +1,9 @@
 package com.koren.phonebook_api.repository;
 
-import com.koren.phonebook_api.model.Contact;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-@Repository
-public interface ContactRepository extends JpaRepository<Contact, Long> {
+import com.koren.phonebook_api.model.Contact;
+
+public interface ContactRepository extends JpaRepository<Contact, Long>, JpaSpecificationExecutor<Contact> {
 }

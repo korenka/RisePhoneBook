@@ -4,8 +4,10 @@ import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
+import com.koren.phonebook_api.model.ErrorResponse;
 import com.koren.phonebook_api.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +19,7 @@ import java.util.List;
 public class ContactController extends BaseController {
     @Autowired
     private ContactService contactService;
-
-    @GetMapping
-    public List<Contact> getContacts(@RequestParam int page, @RequestParam int size) {
-        return contactService.getContacts(page, size);
-    }
+    
     //TODO: remove once app is complete
     @GetMapping("/all")
     public List<Contact> getAllContacts() {
@@ -39,17 +37,23 @@ public class ContactController extends BaseController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> addContact(@Valid @RequestBody CreateContactDTO createContactDTO) {
+    @GetMapping("/search")
+    public ResponseEntity<?> searchContacts(@RequestParam(required = false) String firstName,
+                                            @RequestParam(required = false) String lastName,
+                                            @RequestParam(required = false) String phone) {
         try {
-            Contact contact = new Contact();
-            contact.setFirstName(createContactDTO.getFirstName());
-            contact.setLastName(createContactDTO.getLastName());
-            contact.setPhone(createContactDTO.getPhone());
-            contact.setAddress(createContactDTO.getAddress());
+            List<Contact> contacts = contactService.searchContacts(firstName, lastName, phone);
+            return new ResponseEntity<>(contacts, HttpStatus.OK);
+        } catch (CustomException e) {
+            return handleCustomException(e);
+        }
+    }
 
-            Contact createdContact = contactService.addContact(contact);
-            return ResponseEntity.ok(createdContact);
+    @PostMapping
+    public ResponseEntity<?> addContact(@RequestBody @Valid CreateContactDTO createContactDTO) {
+        try {
+            Contact contact = contactService.addContact(createContactDTO);
+            return new ResponseEntity<>(contact, HttpStatus.CREATED);
         } catch (CustomException e) {
             return handleCustomException(e);
         }
