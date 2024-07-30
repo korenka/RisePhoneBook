@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "contacts")
 public class Contact {
+    //region members
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,8 +28,9 @@ public class Contact {
 
     @Column(name = "address")
     private String address;
+    //endregion
 
-    // Getters and setters
+    //region Getters and setters
     public Long getId() {
         return id;
     }
@@ -68,4 +70,18 @@ public class Contact {
     public void setAddress(String address) {
         this.address = address;
     }
+    //endregion
+
+    //region public methods
+    @Override
+    public String toString() {
+        return "Contact{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                '}';
+    }
+    //endregion
 }

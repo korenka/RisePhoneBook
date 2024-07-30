@@ -5,6 +5,9 @@ import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
 import com.koren.phonebook_api.service.ContactService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +19,32 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contacts")
 public class ContactController extends BaseController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContactController.class);
+    
     @Autowired
     private ContactService contactService;
 
     @GetMapping("/all")
     public ResponseEntity<List<Contact>> getAllContacts() {
+        LOGGER.debug("Fetching all contacts");
         List<Contact> contacts = contactService.getAllContacts();
+        LOGGER.info("Found {} contacts: {}", contacts.size(), contacts);
         return new ResponseEntity<>(contacts, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getContactById(@PathVariable Long id) {
+        LOGGER.debug("Fetching contact by ID: {}", id);
         try {
             Contact contact = contactService.getContactById(id)
-                    .orElseThrow(() -> new CustomException(ErrorType.CONTACT_NOT_FOUND, String.format("Contact with id %d not found", id)));
+                    .orElseThrow(() -> {
+                        LOGGER.warn("Contact with ID {} not found", id);
+                        return new CustomException(ErrorType.CONTACT_NOT_FOUND, String.format("Contact with id %d not found", id));
+                    });
+            LOGGER.info("Found contact with {} ID: {}",id, contact);
             return new ResponseEntity<>(contact, HttpStatus.OK);
         } catch (CustomException e) {
+            LOGGER.error("Error fetching contact by ID {}: {}", id, e.getMessage());
             return handleCustomException(e);
         }
     }
@@ -40,43 +53,61 @@ public class ContactController extends BaseController {
     public ResponseEntity<?> searchContacts(@RequestParam(required = false) String firstName,
                                             @RequestParam(required = false) String lastName,
                                             @RequestParam(required = false) String phone) {
+        LOGGER.debug("Searching contacts with firstName: {}, lastName: {}, phone: {}", firstName, lastName, phone);
         try {
             List<Contact> contacts = contactService.searchContacts(firstName, lastName, phone);
+            LOGGER.info("Found {} contacts matching search criteria: {}", contacts.size(), contacts);
             return new ResponseEntity<>(contacts, HttpStatus.OK);
         } catch (CustomException e) {
+            LOGGER.error("Error searching contacts: {}", e.getMessage());
             return handleCustomException(e);
         }
     }
 
     @PostMapping
     public ResponseEntity<?> addContact(@RequestBody @Valid CreateContactDTO createContactDTO) {
+        LOGGER.debug("Adding new contact: {}", createContactDTO);
         try {
             Contact contact = contactService.addContact(createContactDTO);
+            LOGGER.info("Contact added successfully: {}", contact);
             return new ResponseEntity<>(contact, HttpStatus.CREATED);
         } catch (CustomException e) {
+            LOGGER.error("Error adding contact: {}", e.getMessage());
             return handleCustomException(e);
         }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateContact(@PathVariable Long id, @RequestBody Contact contactDetails) {
+        LOGGER.debug("Updating contact with ID: {}", id);
         try {
             Contact updatedContact = contactService.updateContact(id, contactDetails)
-                .orElseThrow(() -> new CustomException(ErrorType.CONTACT_NOT_FOUND, String.format("Contact with id %d not found", id)));
+                .orElseThrow(() -> {
+                    LOGGER.warn("Contact with ID {} not found", id);
+                    return new CustomException(ErrorType.CONTACT_NOT_FOUND, String.format("Contact with id %d not found", id));
+                });
+            LOGGER.info("Contact updated successfully: {}", updatedContact);
             return new ResponseEntity<>(updatedContact, HttpStatus.OK);
         } catch (CustomException e) {
+            LOGGER.error("Error updating contact: {}", e.getMessage());
             return handleCustomException(e);
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteContact(@PathVariable Long id) {
+        LOGGER.debug("Deleting contact with ID: {}", id);
         try {
             Contact contact = contactService.getContactById(id)
-                    .orElseThrow(() -> new CustomException(ErrorType.CONTACT_NOT_FOUND, String.format("Contact with id %d not found", id)));
+                    .orElseThrow(() -> {
+                        LOGGER.warn("Contact with ID {} not found", id);
+                        return new CustomException(ErrorType.CONTACT_NOT_FOUND, String.format("Contact with id %d not found", id));
+                    });
             contactService.deleteContact(id);
+            LOGGER.info("Contact deleted successfully: {}", contact);
             return ResponseEntity.ok(contact);
         } catch (CustomException e) {
+            LOGGER.error("Error deleting contact: {}", e.getMessage());
             return handleCustomException(e);
         }
     }
