@@ -64,6 +64,19 @@ public class ContactController extends BaseController {
         }
     }
 
+    @PostMapping("/bulk")
+    public ResponseEntity<?> addContactsBulk(@RequestBody @Valid List<CreateContactDTO> createContactDTOs) {
+        LOGGER.debug("Adding bulk contacts: {}", createContactDTOs);
+        try {
+            List<Contact> contacts = contactService.addContactsBulk(createContactDTOs);
+            LOGGER.info("Contacts added successfully: {}", contacts);
+            return new ResponseEntity<>(contacts, HttpStatus.CREATED);
+        } catch (CustomException e) {
+            LOGGER.error("Error adding contacts: {}", e.getMessage());
+            return handleCustomException(e);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> addContact(@RequestBody @Valid CreateContactDTO createContactDTO) {
         LOGGER.debug("Adding new contact: {}", createContactDTO);
@@ -108,6 +121,19 @@ public class ContactController extends BaseController {
             return ResponseEntity.ok(contact);
         } catch (CustomException e) {
             LOGGER.error("Error deleting contact: {}", e.getMessage());
+            return handleCustomException(e);
+        }
+    }
+
+    @DeleteMapping("/bulk")
+    public ResponseEntity<?> deleteContactsBulk(@RequestBody List<Long> ids) {
+        LOGGER.debug("Deleting bulk contacts with IDs: {}", ids);
+        try {
+            List<Contact> deletedContacts = contactService.deleteContactsBulk(ids);
+            LOGGER.info("Contacts deleted successfully for IDs: {}", ids);
+            return ResponseEntity.ok(deletedContacts);
+        } catch (CustomException e) {
+            LOGGER.error("Error deleting contacts: {}", e.getMessage());
             return handleCustomException(e);
         }
     }

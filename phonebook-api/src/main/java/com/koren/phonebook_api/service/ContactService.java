@@ -93,6 +93,34 @@ public class ContactService {
         }
     }
 
+    public List<Contact> addContactsBulk(List<CreateContactDTO> createContactDTOs) {
+        LOGGER.info("Adding bulk contacts: {}", createContactDTOs);
+        RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
+        lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
+        LOGGER.debug("Acquired lock for adding bulk contacts");
+        try {
+            List<Contact> savedContacts = new ArrayList<>();
+            for (CreateContactDTO dto : createContactDTOs) {
+                if (contactRepository.existsByPhone(dto.getPhone())) {
+                    LOGGER.warn("Phone number already exists: {}", dto.getPhone());
+                    throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number already exists: " + dto.getPhone());
+                }
+
+                Contact contact = new Contact();
+                contact.setFirstName(dto.getFirstName());
+                contact.setLastName(dto.getLastName());
+                contact.setPhone(dto.getPhone());
+                contact.setAddress(dto.getAddress());
+                savedContacts.add(contactRepository.save(contact));
+            }
+            LOGGER.info("Bulk contacts added successfully: {}", savedContacts);
+            return savedContacts;
+        } finally {
+            lock.unlock();
+            LOGGER.debug("Released lock after adding bulk contacts");
+        }
+    }
+
     public List<Contact> searchContacts(String firstName, String lastName, String phone) {
         LOGGER.info("Searching contacts - FirstName: {}, LastName: {}, Phone: {}", firstName, lastName, phone);
         Specification<Contact> spec = Specification.where(null);
@@ -160,5 +188,30 @@ public class ContactService {
             lock.unlock();
             LOGGER.debug("Released lock after deleting contact");
         }
+    }
+
+    public List<Contact> deleteContactsBulk(List<Long> ids) {
+        LOGGER.info("Deleting contacts in bulk");
+        List<Contact> deletedContacts = new ArrayList<>();
+        for (Long id : ids) {
+            RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
+            lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
+            LOGGER.debug("Acquired lock for deleting contact in bulk");
+            try {
+                Optional<Contact> contactOptional = contactRepository.findById(id);
+                if (contactOptional.isPresent()) {
+                    deletedContacts.add(contactOptional.get());
+                    contactRepository.deleteById(id);
+                    LOGGER.info("Contact with ID {} deleted successfully", id);
+                } else {
+                    LOGGER.warn("Contact with ID {} not found", id);
+                }
+            } finally {
+                lock.unlock();
+                LOGGER.debug("Released lock after deleting contact in bulk");
+            }
+        }
+        LOGGER.info("Bulk contacts deleted successfully");
+        return deletedContacts;
     }
 }

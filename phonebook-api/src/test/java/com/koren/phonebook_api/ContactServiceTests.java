@@ -43,7 +43,6 @@ public class ContactServiceTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        // Isolating the lock from the tests
         when(redissonClient.getLock(anyString())).thenReturn(rLock);
         doNothing().when(rLock).lock(anyLong(), any(TimeUnit.class));
         doNothing().when(rLock).unlock();
@@ -165,5 +164,62 @@ public class ContactServiceTests {
         assertEquals(2, result.size());
         assertEquals("John", result.get(0).getFirstName());
         assertEquals("Jane", result.get(1).getFirstName());
+    }
+
+    @Test
+    void testAddContactsBulk_whenValidContacts_thenSuccess() {
+        List<CreateContactDTO> createContactDTOs = List.of(
+                TestUtils.createContactDTO("John", "Doe", "1234567890", "123 Main St"),
+                TestUtils.createContactDTO("Jane", "Doe", "0987654321", "456 Elm St")
+        );
+
+        when(contactRepository.existsByPhone(anyString())).thenReturn(false);
+        when(contactRepository.save(any(Contact.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<Contact> result = contactService.addContactsBulk(createContactDTOs);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("John", result.get(0).getFirstName());
+        assertEquals("Jane", result.get(1).getFirstName());
+    }
+
+    @Test
+    void testAddContactsBulk_whenDuplicatePhoneNumber_thenThrowCustomException() {
+        List<CreateContactDTO> createContactDTOs = List.of(
+                TestUtils.createContactDTO("John", "Doe", "1234567890", "123 Main St"),
+                TestUtils.createContactDTO("Jane", "Doe", "0987654321", "456 Elm St")
+        );
+
+        when(contactRepository.existsByPhone("1234567890")).thenReturn(true);
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            contactService.addContactsBulk(createContactDTOs);
+        });
+
+        assertEquals(ErrorType.VALIDATION_ERROR, exception.getErrorType());
+        assertTrue(exception.getMessage().contains("Phone number already exists"));
+    }
+
+    @Test
+    void testDeleteContactsBulk_whenValidIds_thenSuccess() {
+        List<Long> ids = List.of(1L, 2L);
+        List<Contact> contacts = List.of(
+                TestUtils.createContact("John", "Doe", "1234567890", "123 Main St"),
+                TestUtils.createContact("Jane", "Doe", "0987654321", "456 Elm St")
+        );
+
+        when(contactRepository.findById(1L)).thenReturn(Optional.of(contacts.get(0)));
+        when(contactRepository.findById(2L)).thenReturn(Optional.of(contacts.get(1)));
+
+        doNothing().when(contactRepository).deleteById(1L);
+        doNothing().when(contactRepository).deleteById(2L);
+
+        List<Contact> deletedContacts = contactService.deleteContactsBulk(ids);
+
+        assertNotNull(deletedContacts);
+        assertEquals(2, deletedContacts.size());
+        assertEquals("John", deletedContacts.get(0).getFirstName());
+        assertEquals("Jane", deletedContacts.get(1).getFirstName());
     }
 }
