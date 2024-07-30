@@ -5,6 +5,8 @@ import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
 import com.koren.phonebook_api.repository.ContactRepository;
+import com.koren.phonebook_api.validate.Validator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,18 +18,23 @@ import java.util.Optional;
 
 @Service
 public class ContactService {
-
+    
+    //region members
     @Autowired
     private ContactRepository contactRepository;
+    //endregion
 
-    public List<Contact> getContactsWithPagination(int page, int size) {
+    //region private methods
+    private List<Contact> getContactsWithPagination(int page, int size) {
         PageRequest pageable = PageRequest.of(page, size);
         return contactRepository.findAll(pageable).getContent();
     }
+    //endregion
 
+    //region public methods
     public List<Contact> getAllContacts() {
-        int page = 0;  // starting page
-        int size = 100;  // you can adjust the size as needed
+        int page = 0;
+        int size = 10;
 
         List<Contact> allContacts = new ArrayList<>();
         List<Contact> contacts;
@@ -46,7 +53,7 @@ public class ContactService {
     }
 
     public Contact addContact(CreateContactDTO createContactDTO) {
-        validateContact(createContactDTO); // Validate DTO
+        Validator.vlaidateCreateContactDTO(createContactDTO);
         Contact contact = new Contact();
         contact.setFirstName(createContactDTO.getFirstName());
         contact.setLastName(createContactDTO.getLastName());
@@ -78,6 +85,7 @@ public class ContactService {
 
 
     public Optional<Contact> updateContact(Long id, Contact contactDetails) {
+        Validator.vlaidateContact(contactDetails);
         return contactRepository.findById(id).map(contact -> {
             contact.setFirstName(contactDetails.getFirstName());
             contact.setLastName(contactDetails.getLastName());
@@ -90,19 +98,5 @@ public class ContactService {
     public void deleteContact(Long id) {
         contactRepository.deleteById(id);
     }
-
-    private void validateContact(CreateContactDTO createContactDTO) {
-        if (createContactDTO.getFirstName() == null || createContactDTO.getFirstName().isEmpty()) {
-            throw new CustomException(ErrorType.VALIDATION_ERROR, "First name is mandatory");
-        }
-        if (createContactDTO.getLastName() == null || createContactDTO.getLastName().isEmpty()) {
-            throw new CustomException(ErrorType.VALIDATION_ERROR, "Last name is mandatory");
-        }
-        if (createContactDTO.getPhone() == null || !createContactDTO.getPhone().matches("\\d{10}")) {
-            throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number must be exactly 10 digits");
-        }
-        if (createContactDTO.getAddress() == null || createContactDTO.getAddress().isEmpty()) {
-            throw new CustomException(ErrorType.VALIDATION_ERROR, "Address is mandatory");
-        }
-    }
+    //endregion
 }

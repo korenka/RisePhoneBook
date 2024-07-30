@@ -27,9 +27,6 @@ public class PhonebookApiApplicationTests {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Autowired
-    private ContactService contactService;
-
     @Test
     void contextLoads() {
     }

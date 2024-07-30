@@ -4,16 +4,16 @@ import org.springframework.lang.NonNull;
 
 public class CreateContactDTO {
 
-
+    @NonNull
     private String firstName;
 
-
+    @NonNull
     private String lastName;
 
-
+    @NonNull
     private String phone;
 
-  
+    @NonNull
     private String address;
 
     // Getters and setters
