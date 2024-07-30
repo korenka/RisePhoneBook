@@ -10,13 +10,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ValidatorTests {
-
+    //region tests
     @Test
     void testValidateCreateContactDTO_NullFirstName() {
-        CreateContactDTO dto = new CreateContactDTO();
-        dto.setLastName("Doe");
-        dto.setPhone("1234567890");
-        dto.setAddress("123 Main St");
+        CreateContactDTO dto = TestUtils.createContactDTO(null, "Doe", "1234567890", "123 Main St");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             Validator.vlaidateCreateContactDTO(dto);
@@ -28,7 +25,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_EmptyFirstName() {
-        CreateContactDTO dto = new CreateContactDTO();
+        CreateContactDTO dto = TestUtils.createContactDTO("", "Doe", "1234567890", "123 Main St");
         dto.setFirstName("");
         dto.setLastName("Doe");
         dto.setPhone("1234567890");
@@ -44,11 +41,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_InvalidFirstName() {
-        CreateContactDTO dto = new CreateContactDTO();
-        dto.setFirstName("John123");
-        dto.setLastName("Doe");
-        dto.setPhone("1234567890");
-        dto.setAddress("123 Main St");
+        CreateContactDTO dto = TestUtils.createContactDTO("John123", "Doe", "1234567890", "123 Main St");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             Validator.vlaidateCreateContactDTO(dto);
@@ -60,7 +53,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_NullLastName() {
-        CreateContactDTO dto = new CreateContactDTO();
+        CreateContactDTO dto = TestUtils.createContactDTO("John", null, "1234567890", "123 Main St");
         dto.setFirstName("John");
         dto.setPhone("1234567890");
         dto.setAddress("123 Main St");
@@ -75,11 +68,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_EmptyLastName() {
-        CreateContactDTO dto = new CreateContactDTO();
-        dto.setFirstName("John");
-        dto.setLastName("");
-        dto.setPhone("1234567890");
-        dto.setAddress("123 Main St");
+        CreateContactDTO dto = TestUtils.createContactDTO("John", "", "1234567890", "123 Main St");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             Validator.vlaidateCreateContactDTO(dto);
@@ -91,11 +80,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_InvalidLastName() {
-        CreateContactDTO dto = new CreateContactDTO();
-        dto.setFirstName("John");
-        dto.setLastName("Doe123");
-        dto.setPhone("1234567890");
-        dto.setAddress("123 Main St");
+        CreateContactDTO dto = TestUtils.createContactDTO("John", "Doe123", "1234567890", "123 Main St");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             Validator.vlaidateCreateContactDTO(dto);
@@ -107,11 +92,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_InvalidPhoneNumber() {
-        CreateContactDTO dto = new CreateContactDTO();
-        dto.setFirstName("John");
-        dto.setLastName("Doe");
-        dto.setPhone("12345678");
-        dto.setAddress("123 Main St");
+        CreateContactDTO dto = TestUtils.createContactDTO("John", "Doe", "12345678", "123 Main St");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             Validator.vlaidateCreateContactDTO(dto);
@@ -123,10 +104,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_NullAddress() {
-        CreateContactDTO dto = new CreateContactDTO();
-        dto.setFirstName("John");
-        dto.setLastName("Doe");
-        dto.setPhone("1234567890");
+        CreateContactDTO dto = TestUtils.createContactDTO("John", "Doe", "1234567890", null);
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             Validator.vlaidateCreateContactDTO(dto);
@@ -138,11 +116,7 @@ public class ValidatorTests {
 
     @Test
     void testValidateCreateContactDTO_EmptyAddress() {
-        CreateContactDTO dto = new CreateContactDTO();
-        dto.setFirstName("John");
-        dto.setLastName("Doe");
-        dto.setPhone("1234567890");
-        dto.setAddress("");
+        CreateContactDTO dto = TestUtils.createContactDTO("John", "Doe", "1234567890", "");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             Validator.vlaidateCreateContactDTO(dto);
@@ -151,4 +125,5 @@ public class ValidatorTests {
         assert exception.getErrorType() == ErrorType.VALIDATION_ERROR;
         assert exception.getMessage().equals("Address is mandatory");
     }
+    //endregion
 }

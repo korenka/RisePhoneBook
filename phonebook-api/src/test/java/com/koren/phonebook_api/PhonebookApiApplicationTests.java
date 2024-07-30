@@ -22,45 +22,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("test")
 public class PhonebookApiApplicationTests {
 
+    //region members
     @LocalServerPort
     private int randomServerPort;
 
     @Autowired
     private TestRestTemplate restTemplate;
-
     private Long createdContactId;
-
-    //region helper methods
-    private Contact createContact() {
-        Contact contactDetails = new Contact();
-        contactDetails.setFirstName("Jane");
-        contactDetails.setLastName("Doe");
-        contactDetails.setPhone("0987654321");
-        contactDetails.setAddress("456 Main St");
-        return contactDetails;
-    }
-
-    private CreateContactDTO createContactDTO() {
-        CreateContactDTO createContactDTO = new CreateContactDTO();
-        createContactDTO.setFirstName("John");
-        createContactDTO.setLastName("Doe");
-        createContactDTO.setPhone("1234567890");
-        createContactDTO.setAddress("123 Main St");
-        return createContactDTO;
-    }
     //endregion
 
     //region tests
-    @Test
-    void contextLoads() {
-    }
-
     @Test
     void testAddContact() throws URISyntaxException {
         final String baseUrl = "http://localhost:" + randomServerPort + "/api/contacts";
         URI uri = new URI(baseUrl);
 
-        CreateContactDTO createContactDTO = createContactDTO();
+        CreateContactDTO createContactDTO = TestUtils.createContactDTO("John", "Doe", TestUtils.generateUniquePhoneNumber(), "123 Main St");
 
         ResponseEntity<Contact> result = this.restTemplate.postForEntity(uri, createContactDTO, Contact.class);
 
@@ -115,7 +92,7 @@ public class PhonebookApiApplicationTests {
         final String baseUrl = "http://localhost:" + randomServerPort + "/api/contacts/" + createdContactId;
         URI uri = new URI(baseUrl);
 
-        Contact contactDetails = createContact();
+        Contact contactDetails = TestUtils.createContact("John", "Doe", TestUtils.generateUniquePhoneNumber(), "123 Main St");
 
         HttpEntity<Contact> request = new HttpEntity<>(contactDetails);
         ResponseEntity<Contact> result = this.restTemplate.exchange(uri, HttpMethod.PUT, request, Contact.class);
@@ -136,6 +113,5 @@ public class PhonebookApiApplicationTests {
         assertEquals(200, result.getStatusCodeValue());
         assertNotNull(result.getBody());
     }
-
     //endregion
 }

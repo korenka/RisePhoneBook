@@ -5,7 +5,6 @@ import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
 import com.koren.phonebook_api.repository.ContactRepository;
-import com.koren.phonebook_api.validate.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -51,9 +50,11 @@ public class ContactService {
     public Optional<Contact> getContactById(Long id) {
         return contactRepository.findById(id);
     }
-
     public Contact addContact(CreateContactDTO createContactDTO) {
-        Validator.vlaidateCreateContactDTO(createContactDTO);
+        if (contactRepository.existsByPhone(createContactDTO.getPhone())) {
+            throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number already exists");
+        }
+
         Contact contact = new Contact();
         contact.setFirstName(createContactDTO.getFirstName());
         contact.setLastName(createContactDTO.getLastName());
@@ -83,9 +84,11 @@ public class ContactService {
         return contactRepository.findAll(spec);
     }
 
-
     public Optional<Contact> updateContact(Long id, Contact contactDetails) {
-        Validator.vlaidateContact(contactDetails);
+        if (contactRepository.existsByPhoneAndIdNot(contactDetails.getPhone(), id)) {
+            throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number already exists");
+        }
+
         return contactRepository.findById(id).map(contact -> {
             contact.setFirstName(contactDetails.getFirstName());
             contact.setLastName(contactDetails.getLastName());
