@@ -1,28 +1,27 @@
 package com.koren.phonebook_api.validate;
 
-import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
 
 public class Validator {
     //region static methods
-    public static void vlaidateCreateContactDTO(CreateContactDTO createContactDTO) {
-        if (createContactDTO.getFirstName() == null || createContactDTO.getFirstName().isEmpty() || !createContactDTO.getFirstName().matches("^[a-zA-Z]+$")) {
+    public static void vlaidateCreateContact(Contact contact) {
+        if (contact.getFirstName() == null || contact.getFirstName().isEmpty() || !contact.getFirstName().matches("^[a-zA-Z]+$")) {
             throw new CustomException(ErrorType.VALIDATION_ERROR, "First name is mandatory");
         }
-        if (createContactDTO.getLastName() == null || createContactDTO.getLastName().isEmpty() || !createContactDTO.getLastName().matches("^[a-zA-Z]+$")) {
+        if (contact.getLastName() == null || contact.getLastName().isEmpty() || !contact.getLastName().matches("^[a-zA-Z]+$")) {
             throw new CustomException(ErrorType.VALIDATION_ERROR, "Last name is mandatory");
         }
-        if (createContactDTO.getPhone() == null || !createContactDTO.getPhone().matches("\\d{10}")) {
+        if (contact.getPhone() == null || !contact.getPhone().matches("\\d{10}")) {
             throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number must be exactly 10 digits");
         }
-        if (createContactDTO.getAddress() == null || createContactDTO.getAddress().isEmpty()) {
+        if (contact.getAddress() == null || contact.getAddress().isEmpty()) {
             throw new CustomException(ErrorType.VALIDATION_ERROR, "Address is mandatory");
         }
     }
 
-    public static void vlaidateContact(Contact contact) {
+    public static void vlaidateUpdateContact(Contact contact) {
         if (contact.getFirstName() != null) {
             if (contact.getFirstName().isEmpty()) {
              throw new CustomException(ErrorType.VALIDATION_ERROR, "First name cannot be empty");

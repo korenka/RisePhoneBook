@@ -1,6 +1,5 @@
 package com.koren.phonebook_api;
 
-import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +50,7 @@ public class ContactServiceTests {
     void testAddContact_whenDuplicatePhoneNumber_thenThrowCustomException() {
         when(contactRepository.existsByPhone(anyString())).thenReturn(true);
 
-        CreateContactDTO createContactDTO = TestUtils.createContactDTO("John", "Doe", "1234567890", "123 Main St");
+        Contact createContactDTO = TestUtils.createContact("John", "Doe", "1234567890", "123 Main St");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
             contactService.addContact(createContactDTO);
@@ -67,7 +65,7 @@ public class ContactServiceTests {
         when(contactRepository.existsByPhone(anyString())).thenReturn(false);
         when(contactRepository.save(any(Contact.class))).thenReturn(TestUtils.createContact("John", "Doe", "1234567890", "123 Main St"));
 
-        CreateContactDTO createContactDTO = TestUtils.createContactDTO("John", "Doe", "1234567890", "123 Main St");
+        Contact createContactDTO = TestUtils.createContact("John", "Doe", "1234567890", "123 Main St");
 
         Contact savedContact = contactService.addContact(createContactDTO);
 
@@ -119,6 +117,7 @@ public class ContactServiceTests {
         verify(contactRepository, times(1)).deleteById(1L);
     }
 
+
     @Test
     void testGetContactById_whenValidId_thenSuccess() {
         Contact contact = TestUtils.createContact("John", "Doe", "1234567890", "123 Main St");
@@ -168,9 +167,9 @@ public class ContactServiceTests {
 
     @Test
     void testAddContactsBulk_whenValidContacts_thenSuccess() {
-        List<CreateContactDTO> createContactDTOs = List.of(
-                TestUtils.createContactDTO("John", "Doe", "1234567890", "123 Main St"),
-                TestUtils.createContactDTO("Jane", "Doe", "0987654321", "456 Elm St")
+        List<Contact> createContactDTOs = List.of(
+                TestUtils.createContact("John", "Doe", "1234567890", "123 Main St"),
+                TestUtils.createContact("Jane", "Doe", "0987654321", "456 Elm St")
         );
 
         when(contactRepository.existsByPhone(anyString())).thenReturn(false);
@@ -186,9 +185,9 @@ public class ContactServiceTests {
 
     @Test
     void testAddContactsBulk_whenDuplicatePhoneNumber_thenThrowCustomException() {
-        List<CreateContactDTO> createContactDTOs = List.of(
-                TestUtils.createContactDTO("John", "Doe", "1234567890", "123 Main St"),
-                TestUtils.createContactDTO("Jane", "Doe", "0987654321", "456 Elm St")
+        List<Contact> createContactDTOs = List.of(
+                TestUtils.createContact("John", "Doe", "1234567890", "123 Main St"),
+                TestUtils.createContact("Jane", "Doe", "0987654321", "456 Elm St")
         );
 
         when(contactRepository.existsByPhone("1234567890")).thenReturn(true);
@@ -212,8 +211,10 @@ public class ContactServiceTests {
         when(contactRepository.findById(1L)).thenReturn(Optional.of(contacts.get(0)));
         when(contactRepository.findById(2L)).thenReturn(Optional.of(contacts.get(1)));
 
-        doNothing().when(contactRepository).deleteById(1L);
-        doNothing().when(contactRepository).deleteById(2L);
+        doAnswer(invocation -> {
+            Contact contact = invocation.getArgument(0);
+            return contact;
+        }).when(contactRepository).save(any(Contact.class));
 
         List<Contact> deletedContacts = contactService.deleteContactsBulk(ids);
 

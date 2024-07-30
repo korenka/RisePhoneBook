@@ -1,6 +1,5 @@
 package com.koren.phonebook_api.controller;
 
-import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
@@ -19,11 +18,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contacts")
 public class ContactController extends BaseController {
+    //region members
     private static final Logger LOGGER = LoggerFactory.getLogger(ContactController.class);
     
     @Autowired
     private ContactService contactService;
+    //endregion
 
+    //region endpoints
     @GetMapping("/all")
     public ResponseEntity<List<Contact>> getAllContacts() {
         LOGGER.debug("Fetching all contacts");
@@ -65,12 +67,12 @@ public class ContactController extends BaseController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<?> addContactsBulk(@RequestBody @Valid List<CreateContactDTO> createContactDTOs) {
-        LOGGER.debug("Adding bulk contacts: {}", createContactDTOs);
+    public ResponseEntity<?> addContactsBulk(@RequestBody @Valid List<Contact> contacts) {
+        LOGGER.debug("Adding bulk contacts: {}", contacts);
         try {
-            List<Contact> contacts = contactService.addContactsBulk(createContactDTOs);
-            LOGGER.info("Contacts added successfully: {}", contacts);
-            return new ResponseEntity<>(contacts, HttpStatus.CREATED);
+            List<Contact> createdContacts = contactService.addContactsBulk(contacts);
+            LOGGER.info("Contacts added successfully: {}", createdContacts);
+            return new ResponseEntity<>(createdContacts, HttpStatus.CREATED);
         } catch (CustomException e) {
             LOGGER.error("Error adding contacts: {}", e.getMessage());
             return handleCustomException(e);
@@ -78,12 +80,12 @@ public class ContactController extends BaseController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addContact(@RequestBody @Valid CreateContactDTO createContactDTO) {
-        LOGGER.debug("Adding new contact: {}", createContactDTO);
+    public ResponseEntity<?> addContact(@RequestBody @Valid Contact contact) {
+        LOGGER.debug("Adding new contact: {}", contact);
         try {
-            Contact contact = contactService.addContact(createContactDTO);
-            LOGGER.info("Contact added successfully: {}", contact);
-            return new ResponseEntity<>(contact, HttpStatus.CREATED);
+            Contact createdContact = contactService.addContact(contact);
+            LOGGER.info("Contact added successfully: {}", createdContact);
+            return new ResponseEntity<>(createdContact, HttpStatus.CREATED);
         } catch (CustomException e) {
             LOGGER.error("Error adding contact: {}", e.getMessage());
             return handleCustomException(e);
@@ -137,4 +139,5 @@ public class ContactController extends BaseController {
             return handleCustomException(e);
         }
     }
+    //endregion
 }

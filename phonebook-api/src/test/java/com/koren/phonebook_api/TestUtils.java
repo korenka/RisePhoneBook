@@ -1,8 +1,6 @@
 package com.koren.phonebook_api;
 
 import java.util.Random;
-
-import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.model.Contact;
 
 public class TestUtils {
@@ -14,15 +12,6 @@ public class TestUtils {
         contactDetails.setPhone(phone);
         contactDetails.setAddress(address);
         return contactDetails;
-    }
-
-    public static CreateContactDTO createContactDTO(String firstName, String lastName, String phone, String address) {
-        CreateContactDTO createContactDTO = new CreateContactDTO();
-        createContactDTO.setFirstName(firstName);
-        createContactDTO.setLastName(lastName);
-        createContactDTO.setPhone(phone);
-        createContactDTO.setAddress(address);
-        return createContactDTO;
     }
 
     public static String generateUniquePhoneNumber() {

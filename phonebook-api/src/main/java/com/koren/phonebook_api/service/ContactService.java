@@ -1,10 +1,10 @@
 package com.koren.phonebook_api.service;
 
-import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
 import com.koren.phonebook_api.model.Contact;
 import com.koren.phonebook_api.repository.ContactRepository;
+import com.koren.phonebook_api.validate.Validator;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ContactService {
-
+    //region members
     private static final Logger LOGGER = LoggerFactory.getLogger(ContactService.class);
     private static final String CONTACT_LOCK_KEY = "contactLock";
 
@@ -30,7 +30,9 @@ public class ContactService {
 
     @Autowired
     private RedissonClient redissonClient;
+    //endregion
 
+    //region methods
     private List<Contact> getContactsWithPagination(int page, int size) {
         LOGGER.debug("Fetching contacts with pagination - Page: {}, Size: {}", page, size);
         PageRequest pageable = PageRequest.of(page, size);
@@ -68,22 +70,19 @@ public class ContactService {
         return contact;
     }
 
-    public Contact addContact(CreateContactDTO createContactDTO) {
-        LOGGER.info("Adding new contact: {}", createContactDTO);
+    public Contact addContact(Contact contact) {
+        LOGGER.info("Adding new contact: {}", contact);
+        Validator.vlaidateCreateContact(contact);  // Validate the contact before processing
         RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
         lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
         LOGGER.debug("Acquired lock for adding contact");
+
         try {
-            if (contactRepository.existsByPhone(createContactDTO.getPhone())) {
-                LOGGER.warn("Phone number already exists: {}", createContactDTO.getPhone());
+            if (contactRepository.existsByPhone(contact.getPhone())) {
+                LOGGER.warn("Phone number already exists: {}", contact.getPhone());
                 throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number already exists");
             }
 
-            Contact contact = new Contact();
-            contact.setFirstName(createContactDTO.getFirstName());
-            contact.setLastName(createContactDTO.getLastName());
-            contact.setPhone(createContactDTO.getPhone());
-            contact.setAddress(createContactDTO.getAddress());
             Contact savedContact = contactRepository.save(contact);
             LOGGER.info("Contact added successfully: {}", savedContact);
             return savedContact;
@@ -93,24 +92,20 @@ public class ContactService {
         }
     }
 
-    public List<Contact> addContactsBulk(List<CreateContactDTO> createContactDTOs) {
-        LOGGER.info("Adding bulk contacts: {}", createContactDTOs);
+    public List<Contact> addContactsBulk(List<Contact> contacts) {
+        LOGGER.info("Adding bulk contacts: {}", contacts);
         RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
         lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
         LOGGER.debug("Acquired lock for adding bulk contacts");
+
         try {
             List<Contact> savedContacts = new ArrayList<>();
-            for (CreateContactDTO dto : createContactDTOs) {
-                if (contactRepository.existsByPhone(dto.getPhone())) {
-                    LOGGER.warn("Phone number already exists: {}", dto.getPhone());
-                    throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number already exists: " + dto.getPhone());
+            for (Contact contact : contacts) {
+                Validator.vlaidateCreateContact(contact);  // Validate each contact before processing
+                if (contactRepository.existsByPhone(contact.getPhone())) {
+                    LOGGER.warn("Phone number already exists: {}", contact.getPhone());
+                    throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number already exists: " + contact.getPhone());
                 }
-
-                Contact contact = new Contact();
-                contact.setFirstName(dto.getFirstName());
-                contact.setLastName(dto.getLastName());
-                contact.setPhone(dto.getPhone());
-                contact.setAddress(dto.getAddress());
                 savedContacts.add(contactRepository.save(contact));
             }
             LOGGER.info("Bulk contacts added successfully: {}", savedContacts);
@@ -147,9 +142,11 @@ public class ContactService {
 
     public Optional<Contact> updateContact(Long id, Contact contactDetails) {
         LOGGER.info("Updating contact with ID: {}", id);
+        Validator.vlaidateUpdateContact(contactDetails);  // Validate the contact before processing
         RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
         lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
         LOGGER.debug("Acquired lock for updating contact");
+
         try {
             if (contactRepository.existsByPhoneAndIdNot(contactDetails.getPhone(), id)) {
                 LOGGER.warn("Phone number already exists: {}", contactDetails.getPhone());
@@ -181,6 +178,7 @@ public class ContactService {
         RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
         lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
         LOGGER.debug("Acquired lock for deleting contact");
+
         try {
             contactRepository.deleteById(id);
             LOGGER.info("Contact with ID {} deleted successfully", id);
@@ -193,12 +191,15 @@ public class ContactService {
     public List<Contact> deleteContactsBulk(List<Long> ids) {
         LOGGER.info("Deleting contacts in bulk");
         List<Contact> deletedContacts = new ArrayList<>();
+
         for (Long id : ids) {
             RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
             lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
             LOGGER.debug("Acquired lock for deleting contact in bulk");
+
             try {
                 Optional<Contact> contactOptional = contactRepository.findById(id);
+
                 if (contactOptional.isPresent()) {
                     deletedContacts.add(contactOptional.get());
                     contactRepository.deleteById(id);
@@ -212,6 +213,8 @@ public class ContactService {
             }
         }
         LOGGER.info("Bulk contacts deleted successfully");
+
         return deletedContacts;
     }
+    //endregion
 }
