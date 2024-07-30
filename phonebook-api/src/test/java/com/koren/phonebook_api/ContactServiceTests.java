@@ -1,16 +1,18 @@
 package com.koren.phonebook_api;
 
-import com.koren.phonebook_api.model.Contact;
-import com.koren.phonebook_api.service.ContactService;
 import com.koren.phonebook_api.dto.CreateContactDTO;
 import com.koren.phonebook_api.exception.CustomException;
 import com.koren.phonebook_api.exception.ErrorType;
+import com.koren.phonebook_api.model.Contact;
 import com.koren.phonebook_api.repository.ContactRepository;
+import com.koren.phonebook_api.service.ContactService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,15 +21,21 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-
 public class ContactServiceTests {
     @Mock
     private ContactRepository contactRepository;
+
+    @Mock
+    private RedissonClient redissonClient;
+
+    @Mock
+    private RLock rLock;
 
     @InjectMocks
     private ContactService contactService;
@@ -35,6 +43,10 @@ public class ContactServiceTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        // Isolating the lock from the tests
+        when(redissonClient.getLock(anyString())).thenReturn(rLock);
+        doNothing().when(rLock).lock(anyLong(), any(TimeUnit.class));
+        doNothing().when(rLock).unlock();
     }
 
     @Test
