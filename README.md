@@ -1,129 +1,128 @@
 
 # Phonebook API
-
-  
-
 This is a simple Phonebook API application built with Spring Boot and H2 database. It provides endpoints to manage contacts, including adding, updating, retrieving, and deleting contacts.
 
-  
+### 1. Install Prerequisites
 
-## Prerequisites
+#### Install Java
+Make sure you have Java 17 installed. You can download it from [AdoptOpenJDK](https://adoptopenjdk.net/):
 
-  
+```sh
+# For Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install openjdk-17-jdk
 
-- Java 11 or higher
+# For macOS using Homebrew
+brew install openjdk@17
+brew link --force --overwrite openjdk@17
+```
 
-- Maven 3.6.0 or higher
+#### Install Maven
+Ensure you have Maven installed. You can download it from [Apache Maven](https://maven.apache.org/download.cgi):
 
-- Docker (optional, for running the application in a container)
+```sh
+# For Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install maven
 
-  
+# For macOS using Homebrew
+brew install maven
+```
 
-## Getting Started
+#### Install Redis
+Install Redis locally. Instructions can be found on the [Redis website](https://redis.io/download).
 
-  
+```sh
+# For Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install redis-server
+sudo systemctl enable redis-server.service
+sudo systemctl start redis-server.service
 
-### Clone the Repository
+# For macOS using Homebrew
+brew install redis
+brew services start redis
+```
 
-  
+#### Install Docker
+Ensure you have Docker installed. You can download it from [Docker](https://www.docker.com/get-started):
 
-```bash
+```sh
+# For Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# For macOS
+brew install --cask docker
+```
+
+#### Install Redis
+
+
+### 2. Clone the Repository
+
+Clone your repository to your local machine:
+
+```sh
 git clone https://github.com/korenka/RisePhoneBook.git
-
-cd RisePhoneBook
+cd RisePhoneBook/phonebook-api
 ```
-## Build the Project
 
-To build the project, use the following command:
+### 3. Build and Run the Application
 
-```bash
-nvm clean package
+#### Build with Maven
+
+Navigate to the project directory and build the application:
+
+```sh
+mvn clean install
 ```
-### Run the Application Locally
 
-To run the application locally, use the following command:
-```bash
+#### Run with Java
+
+Run the application:
+
+```sh
 java -jar target/phonebook-api-1.0-SNAPSHOT.jar
 ```
-The application will start and be accessible at `http://localhost:8080`.
 
-### Run the Application with Docker
+### 4. Running the Application with Docker
 
-To run the application in a Docker container, follow these steps:
-1.  **Build the Docker Image**:
-    
-    ```bash
-    docker build -t phonebook-api .
-    ``` 
-    
-3.  **Run the Docker Container**:
-    
-    ```bash
-    docker run -d -p 8080:8080 phonebook-api
-    ```
-    
- ### Access the H2 Database Console
+#### Dockerfile
 
-The H2 database console is available at `http://localhost:8080/h2-console`.
+Ensure your `Dockerfile` is as follows:
 
--   **JDBC URL**: `jdbc:h2:file:~/testdb`
--   **Username**: `sa`
--   **Password**: `password`
-### API Endpoints
+```Dockerfile
+FROM openjdk:17-jdk-slim
+VOLUME /tmp
+EXPOSE 8080
+ARG JAR_FILE=target/phonebook-api-1.0-SNAPSHOT.jar
+ADD ${JAR_FILE} phonebook-api.jar
+ENTRYPOINT ["java","-jar","/phonebook-api.jar"]
+```
 
-The following endpoints are available:
+#### Build Docker Image
 
--   **Get All Contacts**:
+Build the Docker image:
 
-    ```bash
-    curl -X GET http://localhost:8080/api/contacts/all
-    ``` 
-    
--   **Get Contacts with Pagination**:
- 
-    ```bash
-    curl -X GET "http://localhost:8080/api/contacts?page=0&size=10"
-    ``` 
-    
--   **Get Contact by ID**:
+```sh
+sudo docker build -t phonebook-api .
+```
 
-    ```bash
-    curl -X GET http://localhost:8080/api/contacts/{id}
-    ``` 
-    
--   **Add a New Contact**:
+#### Run Docker Container
 
-    ```bash
-    curl -X POST http://localhost:8080/api/contacts -H "Content-Type: application/json" -d '{
-      "firstName": "John",
-      "lastName": "Doe",
-      "phone": "1234567890",
-      "address": "123 Main St"
-    }'
-    ``` 
-    
--   **Update an Existing Contact**:
+Run the Docker container:
 
-    ```bash
-    curl -X PUT http://localhost:8080/api/contacts/{id} -H "Content-Type: application/json" -d '{
-      "firstName": "John",
-      "lastName": "Doe",
-      "phone": "0987654321",
-      "address": "456 Elm St"
-    }'
-    ``` 
-    
--   **Delete a Contact**:
+```sh
+sudo docker run -d -p 8080:8080 --name phonebook-container phonebook-api
+```
 
-    ```bash
-    curl -X DELETE http://localhost:8080/api/contacts/{id}
-    ``` 
-    
+### 5. Verify the Setup
 
-### Running Tests
+You can verify if the application is running by sending a request to the API endpoint:
 
-To run the tests, use the following command:
-
-```bash
-mvn test
+```sh
+curl -X GET http://localhost:8080/api/contacts/all
 ```
