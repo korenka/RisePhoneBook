@@ -11,7 +11,7 @@ public class Validator {
         if (createContactDTO.getFirstName() == null || createContactDTO.getFirstName().isEmpty() || !createContactDTO.getFirstName().matches("^[a-zA-Z]+$")) {
             throw new CustomException(ErrorType.VALIDATION_ERROR, "First name is mandatory");
         }
-        if (createContactDTO.getLastName() == null || createContactDTO.getLastName().isEmpty() || !createContactDTO.getFirstName().matches("^[a-zA-Z]+$")) {
+        if (createContactDTO.getLastName() == null || createContactDTO.getLastName().isEmpty() || !createContactDTO.getLastName().matches("^[a-zA-Z]+$")) {
             throw new CustomException(ErrorType.VALIDATION_ERROR, "Last name is mandatory");
         }
         if (createContactDTO.getPhone() == null || !createContactDTO.getPhone().matches("\\d{10}")) {
@@ -28,15 +28,15 @@ public class Validator {
              throw new CustomException(ErrorType.VALIDATION_ERROR, "First name cannot be empty");
             }
             if (!contact.getFirstName().matches("^[a-zA-Z]+$")) {
-             throw new CustomException(ErrorType.VALIDATION_ERROR, "First must only contain English letters");
+             throw new CustomException(ErrorType.VALIDATION_ERROR, "First name must only contain English letters");
             }
         }
         if (contact.getLastName() != null) {
             if (contact.getLastName().isEmpty()) {
              throw new CustomException(ErrorType.VALIDATION_ERROR, "Last name cannot be empty");
             }
-            if (!contact.getFirstName().matches("^[a-zA-Z]+$")) {
-             throw new CustomException(ErrorType.VALIDATION_ERROR, "Last must only contain English letters");
+            if (!contact.getLastName().matches("^[a-zA-Z]+$")) {
+             throw new CustomException(ErrorType.VALIDATION_ERROR, "Last name must only contain English letters");
             }
         }
         if (contact.getPhone() != null) { 

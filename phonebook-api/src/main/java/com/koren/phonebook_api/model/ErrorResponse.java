@@ -1,15 +1,19 @@
 package com.koren.phonebook_api.model;
 
 public class ErrorResponse {
+    //region members
     private int status;
     private String message;
+    //endregion
 
+    //region constructor
     public ErrorResponse(int status, String message) {
         this.status = status;
         this.message = message;
     }
+    //endregion
 
-    // Getters and setters
+    //region getters setters
     public int getStatus() {
         return status;
     }
@@ -25,4 +29,5 @@ public class ErrorResponse {
     public void setMessage(String message) {
         this.message = message;
     }
+    //endregion
 }
