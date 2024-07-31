@@ -1,6 +1,6 @@
 
 # Phonebook API
-This is a simple Phonebook API application built with Spring Boot and H2 database. It provides endpoints to manage contacts, including adding, updating, retrieving, and deleting contacts.
+This is a simple Phonebook API application built with Spring Boot and MySQL database. It provides endpoints to manage contacts, including adding, updating, retrieving, and deleting contacts.
 
 ### 1. Install Prerequisites
 
