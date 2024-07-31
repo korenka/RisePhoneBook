@@ -13,7 +13,7 @@ public class RedissonConfig {
     public RedissonClient redissonClient() {
         Config config = new Config();
         config.useSingleServer()
-              .setAddress("redis://127.0.0.1:6379"); // Adjust the address as needed
+              .setAddress("redis://host.docker.internal:6379"); //If runnig outside of Docker (on your JVM) use 127.0.0.1:6379
 
         return Redisson.create(config);
     }
