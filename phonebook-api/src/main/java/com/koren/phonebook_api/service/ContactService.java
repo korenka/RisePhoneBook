@@ -72,7 +72,7 @@ public class ContactService {
 
     public Contact addContact(Contact contact) {
         LOGGER.info("Adding new contact: {}", contact);
-        Validator.vlaidateCreateContact(contact);  // Validate the contact before processing
+        Validator.vlaidateCreateContact(contact);
         RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
         lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
         LOGGER.debug("Acquired lock for adding contact");
@@ -101,7 +101,7 @@ public class ContactService {
         try {
             List<Contact> savedContacts = new ArrayList<>();
             for (Contact contact : contacts) {
-                Validator.vlaidateCreateContact(contact);  // Validate each contact before processing
+                Validator.vlaidateCreateContact(contact);
                 if (contactRepository.existsByPhone(contact.getPhone())) {
                     LOGGER.warn("Phone number already exists: {}", contact.getPhone());
                     throw new CustomException(ErrorType.VALIDATION_ERROR, "Phone number already exists: " + contact.getPhone());
@@ -142,7 +142,7 @@ public class ContactService {
 
     public Optional<Contact> updateContact(Long id, Contact contactDetails) {
         LOGGER.info("Updating contact with ID: {}", id);
-        Validator.vlaidateUpdateContact(contactDetails);  // Validate the contact before processing
+        Validator.vlaidateUpdateContact(contactDetails);
         RLock lock = redissonClient.getLock(CONTACT_LOCK_KEY);
         lock.lock(10, TimeUnit.SECONDS); // Lock for 10 seconds
         LOGGER.debug("Acquired lock for updating contact");
