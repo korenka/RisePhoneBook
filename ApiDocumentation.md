@@ -11,7 +11,7 @@ This API allows for the management of contacts, including operations such as add
 
 - **URL**: `/api/contacts/all`
 - **Method**: `GET`
-- **Description**: Fetches all contacts.
+- **Description**: Fetches all contacts using pagination of max 10 contacts per page.
 - **Responses**:
   - `200 OK`: Successfully fetched all contacts. Returns a list of contacts.
 
