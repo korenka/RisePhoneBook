@@ -108,7 +108,8 @@ ENTRYPOINT ["java","-jar","/phonebook-api.jar"]
 Build the Docker image:
 
 ```sh
-sudo docker build -t phonebook-api .
+docker pull openjdk:17-jdk-slim
+docker build -t phonebook-api .
 ```
 
 #### Run Docker Container
@@ -125,4 +126,11 @@ You can verify if the application is running by sending a request to the API end
 
 ```sh
 curl -X GET http://localhost:8080/api/contacts/all
+```
+### 6. Check the logs
+
+You can follow the docker running application logs by using this command:
+
+```sh
+docker logs -f phonebook-container
 ```
